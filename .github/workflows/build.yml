@@ -1,0 +1,34 @@
+name: Build KernelSU for K20 Pro
+on: [workflow_dispatch, push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Clone Kernel
+        run: |
+          git clone https://github.com/GZR-Kernels/Kernel-Proton-raphael.git --depth=1
+          cd Kernel-Proton-raphael
+          
+      - name: Install Tools
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential gcc-aarch64-linux-gnu libssl-dev bc flex bison libelf-dev git curl
+          
+      - name: Add KernelSU
+        run: |
+          cd Kernel-Proton-raphael
+          curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+          
+          # For kernel 4.14
+          cd drivers/kernelsu
+          git checkout legacy
+          cd ../../
+          
+      - name: Configure
+        run: |
+          cd Kernel-Proton-raphael
+          export ARCH=arm64
+          export CROSS_COMPILE=aarch64-l
